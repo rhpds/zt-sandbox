@@ -1,50 +1,32 @@
 #!/bin/bash
 
-subscription-manager config --rhsm.manage_repos=1
-subscription-manager register --activationkey=${ACTIVATION_KEY} --org=12451665 --force
+# install the packages
+dnf install -y --releasever=10 --installroot=$scratchmnt redhat-release
+dnf install -y --setopt=reposdir=/etc/yum.repos.d \
+      --installroot=$scratchmnt \
+      --setopt=cachedir=/var/cache/dnf httpd
 
-echo "Adding wheel" > /root/post-run.log
-usermod -aG wheel rhel
+# Enable cockpit functionality in showroom.
+dnf -y remove tlog cockpit-session-recording
+echo "[WebService]" > /etc/cockpit/cockpit.conf
+echo "Origins = https://cockpit-${GUID}.${DOMAIN}" >> /etc/cockpit/cockpit.conf
+echo "AllowUnencrypted = true" >> /etc/cockpit/cockpit.conf
+systemctl enable --now cockpit.socket
 
-echo "setting password" >> /root/post-run.log
-echo redhat | passwd --stdin rhel
+#echo "Adding wheel" > /root/post-run.log
+#usermod -aG wheel rhel
 
-echo "trashing GCP repos" >> /root/post-run.log
-mv /etc/yum.repos.d/google-cloud.repo /root
+#echo "setting password" >> /root/post-run.log
+#echo redhat | passwd --stdin rhel
 
+#echo "exclude=kernel*" >> /etc/yum.conf
 
-# set up SSL for certificate signing
+#echo "Install PCP packages" >> /root/post-run.log
+#dnf install pcp-zeroconf cockpit-pcp stress-ng -y
 
-#check web console url for certificate
-echo https://${HOSTNAME}.${_SANDBOX_ID}.instruqt.io:9090
+#echo "restart cockpit" >> /root/post-run.log
+#systemctl restart cockpit
 
-#also go ahead and echo it to a text file as well just for good measure
-echo https://${HOSTNAME}.${_SANDBOX_ID}.instruqt.io:9090 >> ~/webconsoleurl.txt
+#echo "DONE" >> /root/post-run.log
 
-# Enable EPEL for RHEL 9
-subscription-manager repos --enable codeready-builder-for-rhel-9-$(arch)-rpms
-dnf install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm
-
-#install necessary components
-dnf install -y certbot python3-certbot-nginx
-
-#ensure certbot is successfully installed
-certbot --version
-
-#stop the process that is using TCP port 80; we need that port open for certbot
-fuser -k 80/tcp
-
-#request our certificate
-certbot certonly --standalone --preferred-challenges http -d ${HOSTNAME}.${INSTRUQT_PARTICIPANT_ID}.instruqt.io --non-interactive --agree-tos -m trackbot@instruqt.com -v
-
-#configure our certificate for the web console (copy it into the cockpit certificate folder)
-cat /etc/letsencrypt/live/${HOSTNAME}.${INSTRUQT_PARTICIPANT_ID}.instruqt.io/cert.pem >> /etc/cockpit/ws-certs.d/certificate.cert
-cat /etc/letsencrypt/live/${HOSTNAME}.${INSTRUQT_PARTICIPANT_ID}.instruqt.io/privkey.pem >> /etc/cockpit/ws-certs.d/certificate.cert
-
-#remove the old self-signed certificates
-rm /etc/cockpit/ws-certs.d/0*
-
-#restart cockpit to apply the changs
-systemctl restart cockpit
-
-echo "DONE" >> /root/post-run.log
+#touch /root/post-run.log.done
