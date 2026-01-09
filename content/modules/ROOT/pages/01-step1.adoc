@@ -4,7 +4,19 @@ The system displayed beside this text is a Red Hat Enterprise Linux 10
 system registered with Subscription Manager. An unprivileged user also
 exists on the system.
 
-Username: *rhel* Password: {bastion_ssh_password}
+You can use these credentials to login to the `cockpit` web ui.
+
+Username:
+[source,js]
+----
+rhel
+----
+
+Password:
+[source,js,subs="+macros,+attributes",role=execute]
+----
+{bastion_ssh_password}
+----
 
 Enjoy your unstructured lab time, the system will disconnect after about
 60 minutes.
