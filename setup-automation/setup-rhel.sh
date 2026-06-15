@@ -1,10 +1,10 @@
 #!/bin/bash
 
 # install the packages
-dnf install -y --releasever=10 --installroot=$scratchmnt redhat-release
-dnf install -y --setopt=reposdir=/etc/yum.repos.d \
-      --installroot=$scratchmnt \
-      --setopt=cachedir=/var/cache/dnf httpd
+# dnf install -y --releasever=10 --installroot=$scratchmnt redhat-release
+# dnf install -y --setopt=reposdir=/etc/yum.repos.d \
+#       --installroot=$scratchmnt \
+#       --setopt=cachedir=/var/cache/dnf httpd
 
 # Enable cockpit functionality in showroom.
 dnf -y remove tlog cockpit-session-recording
