@@ -7,13 +7,13 @@ exists on the system.
 You can use these credentials to login to the `cockpit` web ui.
 
 Username:
-[source,js]
+[source,test]
 ----
 rhel
 ----
 
 Password:
-[source,js,subs="+macros,+attributes",role=execute]
+[source,text]
 ----
 {bastion_ssh_password}
 ----
